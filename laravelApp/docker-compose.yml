@@ -1,0 +1,53 @@
+version: "3"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/php-fpm/Dockerfile
+    image: docker/laravelproject
+    container_name: app
+    restart: unless-stopped
+    environment: 
+      DB_CONNECTION: mysql
+      DB_HOST: db_host
+      DB_DATABASE: db_database
+      DB_USERNAME: db_username
+      DB_PASSWORD: db_password
+    volumes:
+      - ./:/var/www
+      - ./config/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+  webserver:
+    build:
+      context: .
+      dockerfile : ./docker/nginx/Dockerfile
+    image: docker/nginx
+    container_name: webserver
+    restart: unless-stopped
+    ports: 
+      - "8080:80"
+    volumes: 
+      - ./:/var/www
+      - ./config/nginx/conf.d/:/etc/nginx/conf.d
+    depends_on: 
+      - app
+
+  nodejs:
+    build:
+      context: .
+      dockerfile : ./docker/nodejs/Dockerfile
+    volumes:
+      - .:/build
+    working_dir: /build
+
+  db:
+    image: mysql:5.7.22
+    container_name: db
+    environment: 
+      DB_CONNECTION: mysql
+      DB_HOST: db_host
+      DB_DATABASE: db_database
+      DB_USERNAME: db_username
+      DB_PASSWORD: db_password
+    ports:
+      - "3306:3306"
