@@ -9,6 +9,7 @@ resource "aws_s3_bucket" "codebuild-cache" {
 resource "aws_s3_bucket" "demo-artifacts" {
   bucket = "demo-artifacts-${random_string.random.result}"
   acl    = "private"
+  force_destroy = true
 
   lifecycle_rule {
     id      = "clean-up"

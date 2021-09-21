@@ -1,6 +1,6 @@
-# resource "aws_ecr_repository" "demo" {
-#   name = "demo"
-# }
+resource "aws_ecr_repository" "demo" {
+  name = "demo"
+}
 
 resource "aws_ecr_repository" "demo_php_fpm" {
   name = "demo/php-fpm"
