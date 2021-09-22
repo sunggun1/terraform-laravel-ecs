@@ -60,7 +60,6 @@ COPY --chown=www:www . /var/www
 USER root
 RUN chgrp -R www /var/www
 RUN composer install
-RUN php artisan key:generate
 
 
 # Expose port 9000 and start php-fpm server
@@ -68,7 +67,7 @@ EXPOSE 3000
 
 # Run php-fpm
 #CMD ["php-fpm"]
-
+CMD php artisan serve --host=0.0.0.0 --port 3000
 
 # FROM php:7.4-fpm-alpine3.12
 
