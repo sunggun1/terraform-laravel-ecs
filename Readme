@@ -1,5 +1,7 @@
 You should set you AWS_EVN file on .env
 
+If you want to use docker on local, you also edit docker-compose.yml db file
+
 
 I used 
 
