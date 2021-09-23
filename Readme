@@ -2,6 +2,8 @@ You should set you AWS_EVN file on .env
 
 If you want to use docker on local, you also edit docker-compose.yml db file
 
+This is terraform laravel ecs rds and blue green codepipeline (codecommit, codebuild, codedeploy)
+
 
 I used 
 
