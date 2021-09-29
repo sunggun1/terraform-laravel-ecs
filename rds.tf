@@ -1,7 +1,28 @@
-resource "aws_db_subnet_group" "mysqldb-subnet"{
-    name = "mysqldb-subnet"
-    description = "RDS subnet group"
-    subnet_ids = module.vpc.private_subnets
+# ---------------------------------------------------------------------------------------------------------------------
+# CREATE AN SUBNET GROUP ACROSS ALL THE SUBNETS OF THE DEFAULT ASG TO HOST THE RDS INSTANCE
+# ---------------------------------------------------------------------------------------------------------------------
+
+resource "aws_db_subnet_group" "example" {
+  name       = "mysqldb"
+  subnet_ids = data.aws_subnet_ids.all.ids
+
+  tags = {
+    Name = "mysqldb"
+  }
+}
+
+resource "aws_security_group" "db_instance" {
+  name   = "mysqldb"
+  vpc_id = data.aws_vpc.default.id
+}
+
+resource "aws_security_group_rule" "allow_db_access" {
+  type              = "ingress"
+  from_port         = 3306
+  to_port           = 3306
+  protocol          = "tcp"
+  security_group_id = aws_security_group.db_instance.id
+  cidr_blocks       = ["0.0.0.0/0"]
 }
 
 resource "aws_db_parameter_group" "mysql-parameters"{
@@ -15,30 +36,6 @@ resource "aws_db_parameter_group" "mysql-parameters"{
     }
 }
 
-resource "aws_security_group" "allow-mysqldb"{
-    vpc_id = module.vpc.vpc_id
-    name = "allow-mysqldb"
-    description = "allow-mysqldb"
-
-    ingress{
-        from_port = 3306
-        to_port = 3306
-        protocol = "tcp"
-        security_groups = [aws_security_group.ecs-demo.id]
-    }
-
-    egress{
-        from_port = 0
-        to_port = 0 
-        protocol = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-
-    tags = {
-        Name = "allow-mysqldb"
-    }
-}
-
 resource "aws_db_instance" "default" {
   allocated_storage    = 100
   engine               = "mysql"
@@ -47,14 +44,15 @@ resource "aws_db_instance" "default" {
   name                 = "db"
   username             = "username"
   password             = "password"
-  db_subnet_group_name    = aws_db_subnet_group.mysqldb-subnet.name
   parameter_group_name    = aws_db_parameter_group.mysql-parameters.name
+  db_subnet_group_name   = aws_db_subnet_group.example.id
+  vpc_security_group_ids = [aws_security_group.db_instance.id]
   multi_az                = "false" # set to true to have high availability: 2 instances synchronized with each other
-  vpc_security_group_ids  = [aws_security_group.ecs-demo.id]
   storage_type            = "gp2"
   backup_retention_period = 30                                          # how long you’re going to keep your backups
   availability_zone       = data.aws_availability_zones.available.names[0] # prefered AZ
   skip_final_snapshot     = true                                        # skip final snapshot when doing terraform destroy
+  publicly_accessible     = true
   tags = {
     Name = "mysqldb-instance"
   }
