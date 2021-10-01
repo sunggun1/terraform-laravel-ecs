@@ -1,12 +1,22 @@
 FROM php:7.4-fpm-alpine3.12
 
-ARG APP_ENV
+ENV DEBIAN_FRONTEND noninteractive
 
 WORKDIR /var/www
 
-# Install Additional dependencies
+ARG PHPGROUP
+ARG PHPUSER
+
+ENV PHPGROUP=${PHPGROUP}
+ENV PHPUSER=${PHPUSER}
+
+RUN adduser -g ${PHPGROUP} -s /bin/bash -D ${PHPUSER}; exit 0
+
+RUN sed -i "s/user = www-data/user = ${PHPUSER}/g" /usr/local/etc/php-fpm.d/www.conf
+RUN sed -i "s/group = www-data/group = ${PHPGROUP}/g" /usr/local/etc/php-fpm.d/www.conf
+
 RUN apk update && apk add --no-cache $PHPIZE_DEPS \
-   build-base shadow nano curl gcc git bash \
+   build-base shadow nano curl gcc git bash vim \
    php7 \
    php7-fpm \
    php7-common \
@@ -25,89 +35,36 @@ RUN apk update && apk add --no-cache $PHPIZE_DEPS \
    php7-session \
    php7-zlib
 
-# RUN apk add nodejs
-RUN apk add --update npm
-RUN apk add --update nodejs nodejs-npm
-
 # Install extensions
 RUN docker-php-ext-install pdo pdo_mysql
 RUN docker-php-ext-enable pdo_mysql
 
-
-# install xdebug and enable it if the development environment is local
-RUN if [ $APP_ENV = "local" ]; then \
-   pecl install xdebug; \
-   docker-php-ext-enable xdebug; \
-fi;
-
-# Install PHP Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
 # Remove Cache
 RUN rm -rf /var/cache/apk/*
 
+RUN apk add dos2unix
+
+RUN mkdir -p /usr/src/php/ext/redis \
+    && curl -L https://github.com/phpredis/phpredis/archive/5.3.4.tar.gz | tar xvz -C /usr/src/php/ext/redis --strip 1 \
+    && echo 'redis' >> /usr/src/php-available-exts \
+    && docker-php-ext-install redis
 
 # Copy config
 COPY ./config/php/local.ini /usr/local/etc/php/conf.d/local.ini
 
-RUN addgroup -g 1000 -S www && \
-    adduser -u 1000 -S www -G www
-
-USER www
-
-COPY --chown=www:www . /var/www
+USER www-data
+COPY --chown=www-data:www-data . /var/www
 
 USER root
-RUN chgrp -R www /var/www
-RUN composer install
+RUN chgrp -R www-data /var/www
+RUN sed -i 's/\r$//' ./start_script.sh
+RUN ["chmod", "+x", "./start_script.sh"]
+RUN dos2unix ./start_script.sh
 
-
-# Expose port 9000 and start php-fpm server
+USER www-data
 EXPOSE 3000
+RUN ls -l
+
 
 # Run php-fpm
-#CMD ["php-fpm"]
-CMD php artisan serve --host=0.0.0.0 --port 3000
-
-# FROM php:7.4-fpm-alpine3.12
-
-# WORKDIR /var/www
-
-# RUN apk update && apk add \
-#     build-base \
-#     freetype-dev \
-#     libjpeg-turbo-dev \
-#     libpng-dev \
-#     libonig-dev \
-#     libzip-dev \
-#     zip \
-#     jpegoptim optipng pngquant gifsicle \
-#     vim \
-#     unzip \
-#     git \
-#     curl
-
-# RUN docker-php-ext-install mbstring zip exif pcntl
-# RUN docker-php-ext-configure gd --with-gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/
-# RUN docker-php-ext-install gd
-
-# # Install Redis Extension
-# RUN apk add autoconf && pecl install -o -f redis \
-# &&  rm -rf /tmp/pear \
-# &&  docker-php-ext-enable redis && apk del autoconf
-
-# # Copy config
-# COPY ./config/php/local.ini /usr/local/etc/php/conf.d/local.ini
-
-# RUN addgroup -g 1000 -S www && \
-#     adduser -u 1000 -S www -G www
-
-# USER www
-
-# COPY --chown=www:www . /var/www
-
-# RUN npm install
-
-# EXPOSE 9000
-
-# CMD npm start
+CMD ./start_script.sh

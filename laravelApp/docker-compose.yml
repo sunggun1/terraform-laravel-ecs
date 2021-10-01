@@ -4,15 +4,18 @@ services:
     build:
       context: .
       dockerfile: ./docker/php-fpm/Dockerfile
+      args:
+        - PHPUSER=${PHPUSER:-www-data}
+        - PHPGROUP=${PHPGROUP:-www-data}
     image: docker/laravelproject
     container_name: app
+    tty : true
     restart: unless-stopped
-    environment: 
-      DB_CONNECTION: mysql
-      DB_HOST: db_host
-      DB_DATABASE: db_database
-      DB_USERNAME: db_username
-      DB_PASSWORD: db_password
+    environment:
+      DB_HOST : db
+      DB_PASSWORD : password
+      SESSION_DRIVER: redis
+      REDIS_HOST: redis
     volumes:
       - ./:/var/www
       - ./config/php/local.ini:/usr/local/etc/php/conf.d/local.ini
@@ -21,6 +24,9 @@ services:
     build:
       context: .
       dockerfile : ./docker/nginx/Dockerfile
+      args:
+        - NGINXUSER=${NGINXUSER:-www-data}
+        - NGINXGROUP=${NGINXGROUP:-www-data}
     image: docker/nginx
     container_name: webserver
     restart: unless-stopped
@@ -32,22 +38,15 @@ services:
     depends_on: 
       - app
 
-  nodejs:
-    build:
-      context: .
-      dockerfile : ./docker/nodejs/Dockerfile
-    volumes:
-      - .:/build
-    working_dir: /build
-
   db:
     image: mysql:5.7.22
-    container_name: db
-    environment: 
-      DB_CONNECTION: mysql
-      DB_HOST: db_host
-      DB_DATABASE: db_database
-      DB_USERNAME: db_username
-      DB_PASSWORD: db_password
-    ports:
-      - "3306:3306"
+    container_name : db
+    environment : 
+      MYSQL_DATABASE : laravel
+      MYSQL_ROOT_PASSWORD : password
+    volumes:
+      - dbdata:/var/lib/mysql
+
+volumes:
+  dbdata:
+    driver: local
