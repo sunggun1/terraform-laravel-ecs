@@ -7,6 +7,7 @@ This is terraform laravel ecs rds and blue green codepipeline (codecommit, codeb
 local file
 docker run --rm -v ${PWD}:/app composer install
 docker run --rm -v ${PWD}:/app npmjs/npm-docker-baseline:8-alpine /bin/bash -c "npm run install; && npm run dev"
+docker-compose exec app php artisan migrate
 
 This still need how to migrate to ecs
 
