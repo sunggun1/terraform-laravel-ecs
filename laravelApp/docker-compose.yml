@@ -4,29 +4,25 @@ services:
     build:
       context: .
       dockerfile: ./docker/php-fpm/Dockerfile
-      args:
-        - PHPUSER=${PHPUSER:-www-data}
-        - PHPGROUP=${PHPGROUP:-www-data}
-    image: docker/laravelproject
+    image: docker/laravel
     container_name: app
-    tty : true
+    tty: true
     restart: unless-stopped
-    environment:
-      DB_HOST : db
-      DB_PASSWORD : password
+    environment: 
+      DB_HOST: db
+      DB_PASSWORD: password
       SESSION_DRIVER: redis
       REDIS_HOST: redis
-    volumes:
+    volumes: 
       - ./:/var/www
       - ./config/php/local.ini:/usr/local/etc/php/conf.d/local.ini
-
+    depends_on:
+      - db
+    
   webserver:
     build:
       context: .
-      dockerfile : ./docker/nginx/Dockerfile
-      args:
-        - NGINXUSER=${NGINXUSER:-www-data}
-        - NGINXGROUP=${NGINXGROUP:-www-data}
+      dockerfile: ./docker/nginx/Dockerfile
     image: docker/nginx
     container_name: webserver
     restart: unless-stopped
@@ -34,18 +30,24 @@ services:
       - "8080:80"
     volumes: 
       - ./:/var/www
-      - ./config/nginx/conf.d/:/etc/nginx/conf.d
+      - ./config/nginx/conf.d/:/etc/nginx/conf.d/
     depends_on: 
       - app
-
+  
   db:
-    image: mysql:5.7.22
-    container_name : db
-    environment : 
-      MYSQL_DATABASE : laravel
-      MYSQL_ROOT_PASSWORD : password
+    image: mysql:5.7
+    container_name: db
+    environment: 
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: password
+    tty: true
+    ports:
+      - "3306:3306"
     volumes:
       - dbdata:/var/lib/mysql
+  redis:
+    image: redis:latest
+    container_name: redis
 
 volumes:
   dbdata:

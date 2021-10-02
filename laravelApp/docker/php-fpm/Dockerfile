@@ -1,19 +1,7 @@
 FROM php:7.4-fpm-alpine3.12
-
-ENV DEBIAN_FRONTEND noninteractive
+USER root
 
 WORKDIR /var/www
-
-ARG PHPGROUP
-ARG PHPUSER
-
-ENV PHPGROUP=${PHPGROUP}
-ENV PHPUSER=${PHPUSER}
-
-RUN adduser -g ${PHPGROUP} -s /bin/bash -D ${PHPUSER}; exit 0
-
-RUN sed -i "s/user = www-data/user = ${PHPUSER}/g" /usr/local/etc/php-fpm.d/www.conf
-RUN sed -i "s/group = www-data/group = ${PHPGROUP}/g" /usr/local/etc/php-fpm.d/www.conf
 
 RUN apk update && apk add --no-cache $PHPIZE_DEPS \
    build-base shadow nano curl gcc git bash vim \
@@ -35,14 +23,12 @@ RUN apk update && apk add --no-cache $PHPIZE_DEPS \
    php7-session \
    php7-zlib
 
-# Install extensions
+# # Install extensions
 RUN docker-php-ext-install pdo pdo_mysql
 RUN docker-php-ext-enable pdo_mysql
 
 # Remove Cache
 RUN rm -rf /var/cache/apk/*
-
-RUN apk add dos2unix
 
 RUN mkdir -p /usr/src/php/ext/redis \
     && curl -L https://github.com/phpredis/phpredis/archive/5.3.4.tar.gz | tar xvz -C /usr/src/php/ext/redis --strip 1 \
@@ -52,19 +38,24 @@ RUN mkdir -p /usr/src/php/ext/redis \
 # Copy config
 COPY ./config/php/local.ini /usr/local/etc/php/conf.d/local.ini
 
-USER www-data
-COPY --chown=www-data:www-data . /var/www
+# Grab gosu for easy step-down from root
+ENV GOSU_VERSION 1.11
+RUN set -x \
+  && curl -sSLo /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture | awk -F- '{ print $NF }')" \
+  && chmod +xs /usr/local/bin/gosu \
+  && gosu nobody true
 
-USER root
-RUN chgrp -R www-data /var/www
-RUN sed -i 's/\r$//' ./start_script.sh
+# verify that the binary w
+RUN addgroup -g 1000 -S www && \
+    adduser -u 1000 -S www -G www
+
+COPY --chown=www:www . /var/www/
+
 RUN ["chmod", "+x", "./start_script.sh"]
-RUN dos2unix ./start_script.sh
 
-USER www-data
-EXPOSE 3000
-RUN ls -l
-
-
+EXPOSE 9000
+RUN chmod 775 /var/www/storage
+USER www
 # Run php-fpm
-CMD ./start_script.sh
+
+CMD ["./start_script.sh"]
