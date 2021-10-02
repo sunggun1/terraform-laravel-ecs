@@ -8,6 +8,7 @@ local file
 docker run --rm -v ${PWD}:/app composer install
 docker run --rm -v ${PWD}:/app npmjs/npm-docker-baseline:8-alpine /bin/bash -c "npm run install; && npm run dev"
 docker-compose exec app php artisan migrate
+docker build -t docker/laravel -f .\docker\php-fpm\Dockerfile . --progress=plain (to see ls -al)
 
 This still need how to migrate to ecs
 
