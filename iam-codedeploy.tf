@@ -26,6 +26,7 @@ data "aws_iam_policy_document" "demo-codedeploy-role-policy" {
       "ecs:CreateTaskSet",
       "ecs:UpdateServicePrimaryTaskSet",
       "ecs:DeleteTaskSet",
+      "ecs:DescribeClusters",
       "elasticloadbalancing:DescribeTargetGroups",
       "elasticloadbalancing:DescribeListeners",
       "elasticloadbalancing:ModifyListener",

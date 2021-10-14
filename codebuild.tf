@@ -17,7 +17,7 @@ resource "aws_codebuild_project" "demo" {
 
   environment {
     compute_type    = "BUILD_GENERAL1_SMALL"
-    image           = "aws/codebuild/docker:18.09.0"
+    image           = "aws/codebuild/standard:5.0"
     type            = "LINUX_CONTAINER"
     privileged_mode = true
 
@@ -29,10 +29,6 @@ resource "aws_codebuild_project" "demo" {
       name  = "AWS_ACCOUNT_ID"
       value = data.aws_caller_identity.current.account_id
     }
-    environment_variable {
-      name  = "IMAGE_REPO_NAME"
-      value = aws_ecr_repository.demo.name
-    }
     environment_variable{
       name ="IMAGE_PHP_FPM_NAME"
       value = aws_ecr_repository.demo_php_fpm.name
@@ -40,6 +36,10 @@ resource "aws_codebuild_project" "demo" {
     environment_variable{
       name = "IMAGE_NGINX_NAME"
       value = aws_ecr_repository.demo_nginx.name
+    }
+    environment_variable{
+      name = "PHP_FPM_TASK_DEFINITON_NAME"
+      value = "app"
     }
   }
 

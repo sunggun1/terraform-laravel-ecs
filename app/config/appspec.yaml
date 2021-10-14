@@ -6,5 +6,5 @@ Resources:
         # <TASK_DEFINITION> will be replaced by codedeploy when the pipeline runs
         TaskDefinition: "<TASK_DEFINITION>"
         LoadBalancerInfo: 
-          ContainerName: demo
-          ContainerPort: 3000
+          ContainerName: nginx
+          ContainerPort: 80
