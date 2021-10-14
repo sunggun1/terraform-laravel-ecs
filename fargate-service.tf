@@ -27,10 +27,10 @@ resource "aws_ecs_task_definition" "demo" {
        {"name" : "DB_HOST", "value" : "${aws_db_instance.default.address}"},
        {"name" : "DB_DATABASE", "value" : "${aws_db_instance.default.name}"},
        {"name" : "DB_USERNAME" , "value": "${aws_db_instance.default.username}"},
-       {"name" : "DB_PASSWORD" , "value" : "Topceo8963"},
+       {"name" : "DB_PASSWORD" , "value" : "password"},
        {"name" : "REDIS_HOST" , "value" : "${aws_elasticache_cluster.redis.cache_nodes.0.address}"},
        {"name" : "SESSION_DRIVER" , "value" : "redis"},
-       {"name" : "APP_KEY" , "value" : "base64:EHhE3uFhqWDJOrsPbt8TbGJ1aqkx523kxKXSjblpvz4="}
+       {"name" : "APP_KEY" , "value" : "Your APP_KEY"}
      ],
      "portMappings": [],
      "pseudoTerminal" : true
