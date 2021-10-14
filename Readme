@@ -45,7 +45,7 @@ After codepipeline is installed
 
 Then the server is all set!
 
-You can access to the web server with the load balancer DNS name.
+You can access to the web server with the load balancer DNS name after code deploy is finished.
 
 I used 
 https://www.udemy.com/course/aws-ecs-devops-masterclass/
