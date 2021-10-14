@@ -1,22 +1,49 @@
-You should set you AWS_EVN file on .env
+This is the terraform laravel redis elasticache ecs ec2 autoscaling rds and blue green codepipeline (codecommit, codebuild, codedeploy)
 
-If you want to use docker on local, you also edit docker-compose.yml db file
+First, you should have a bash aws installed if you are on windows 10 to execute local-exec.
 
-This is terraform laravel ecs rds and blue green codepipeline (codecommit, codebuild, codedeploy)
+You make new laravel app with any name in the terraform folder.
+You copy app/config/appspec.yml , app/config/buildspec.yml, app/scripts/create-new-task-def.sh into the laravel root folder.
 
-local file
-docker-compose up
+Make new laravel (if you have a composer installed)
+docker run --rm -v ${PWD}:/app composer create-project --prefer-dist laravel/laravel blog
+
+For local file(in the laravel root folder)
 docker run --rm -v ${PWD}:/app composer require laravel/ui
-docker run --rm -v ${PWD}:/app composer install
-docker run --rm -v ${PWD}:/app composer dump-autoload
 docker run --rm -v ${PWD}:/app npmjs/npm-docker-baseline:12-alpine /bin/bash -c "npm run install; npm run dev"
 docker-compose exec app php artisan migrate
-docker build -t docker/laravel -f .\docker\php-fpm\Dockerfile . --progress=plain (to see ls -al)
+docker run --rm -v ${PWD}:/app composer install
+docker run --rm -v ${PWD}:/app composer dump-autoload
 
-This still need how to migrate to ecs
+docker system prune ( to clear all dockers,  if you already have a same volume, you might get an error)
+docker build -t docker/nginx -f .\docker\nginx\Dockerfile .
+docker build -t docker/laravel -f .\docker\php-fpm\Dockerfile . --progress=plain (to see ls -al)
+docker-compose up
+
+For terraform (in the terraform folder) 
+terraform init
+terraform plan
+terraform apply
+
+Delete terraform
+terraform delete --auto-approve
+(if you have an error to delete , you should manually delete everything else on aws.)
+
+After codepipeline is installed
+1. cd laravelfolder
+2. git remote add origin ssh://git-codecommit.ap-northeast-2.amazonaws.com/v1/repos/laravel
+3. git remote -v (to check the url)
+4. git add .
+5. git commit -m 'first commit'
+6. git push -u origin master
+
+
+Then the server is all set!
+
+You can access to the web server with the load balancer DNS name.
 
 I used 
-
+https://www.udemy.com/course/aws-ecs-devops-masterclass/
 https://www.udemy.com/course/learn-devops-infrastructure-automation-with-terraform/
 https://github.com/imunew/laravel-ecs-demo/blob/master/docker-compose.yml
 https://www.youtube.com/watch?v=_EG6ytpIbAI&list=PLqbAIRubjG2VwWVPX4lobDQZGLDCZZ0z1&index=13
