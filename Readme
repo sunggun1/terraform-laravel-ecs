@@ -20,6 +20,9 @@ docker build -t docker/nginx -f .\docker\nginx\Dockerfile .
 docker build -t docker/laravel -f .\docker\php-fpm\Dockerfile . --progress=plain (to see ls -al)
 docker-compose up
 
+You also have to change fargate-service "APP_KEY" value with your app_key on .env
+and set your own rds password and username
+
 For terraform (in the terraform folder) 
 terraform init
 terraform plan
