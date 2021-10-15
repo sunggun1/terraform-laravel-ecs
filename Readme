@@ -23,6 +23,8 @@ docker-compose up
 You also have to change fargate-service "APP_KEY" value with your app_key on .env
 and set your own rds password and username
 
+and .env you change AWS Confidentails with yours.
+
 For terraform (in the terraform folder) 
 terraform init
 terraform plan
@@ -43,7 +45,7 @@ After codepipeline is installed
 
 Then the server is all set!
 
-You can access to the web server with the load balancer DNS name.
+You can access to the web server with the load balancer DNS name after code deploy is finished.
 
 I used 
 https://www.udemy.com/course/aws-ecs-devops-masterclass/
