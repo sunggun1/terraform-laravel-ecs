@@ -81,7 +81,7 @@ resource "aws_ecs_service" "demo" {
   scheduling_strategy = "REPLICA"
   deployment_minimum_healthy_percent = 100
   deployment_maximum_percent = 200
-  iam_role = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/ecsServiceRole"
+  iam_role = "${aws_iam_role.ecsServiceRole.arn}"
 
   deployment_controller {
     type = "CODE_DEPLOY"
@@ -135,6 +135,6 @@ resource "aws_appautoscaling_policy" "ecs_policy" {
 }
 
 # logs
-resource "aws_cloudwatch_log_group" "demo" {
-  name = "demo"
+resource "aws_cloudwatch_log_group" "ecs" {
+  name = "/ecs/demo"
 }

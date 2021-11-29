@@ -26,7 +26,7 @@ resource "aws_launch_configuration" "launchConfig" {
   image_id      = data.aws_ami.aws_optimized_ecs.id
   instance_type = "t2.micro"
 
-  iam_instance_profile = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:instance-profile/ecsInstanceRole"
+  iam_instance_profile = "${aws_iam_instance_profile.ecsInstanceRole.id}"
 
   security_groups = ["${aws_security_group.launchConfig.id}"]
   
