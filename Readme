@@ -1,3 +1,5 @@
+https://github.com/hansungingang/capstone/tree/main/terraformcode you can see here.
+
 This is the terraform laravel redis elasticache ecs ec2 autoscaling rds and blue green codepipeline (codecommit, codebuild, codedeploy)
 
 First, you should have a bash aws installed if you are on windows 10 to execute local-exec.
